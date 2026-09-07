@@ -1,1 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INI-CET 2026 Compact White Overlay (Font 12)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
 
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: transparent;
+            color: #0f172a;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* 90% Opacity White Widgets with 20px Blur Effect over camera output */
+        .white-widget {
+            background: rgba(255, 255, 255, 0.90);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(226, 232, 240, 0.95);
+            box-shadow: 0 6px 18px -4px rgba(0, 0, 0, 0.22);
+        }
+
+        .white-pill {
+            background: rgba(255, 255, 255, 0.90);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(203, 213, 225, 0.85);
+        }
+
+        /* Analog Clock Styling */
+        .clock-face {
+            stroke: #cbd5e1;
+            stroke-width: 2.5;
+            fill: #ffffff;
+        }
+        
+        .clock-hand-hour {
+            stroke: #0f172a;
+            stroke-width: 3.5;
+            stroke-linecap: round;
+        }
+
+        .clock-hand-minute {
+            stroke: #334155;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+        }
+
+        .clock-hand-second {
+            stroke: #dc2626;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+        }
+
+        /* Active Card Animations */
+        @keyframes pulse-active {
+            0% { border-color: #16a34a; box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4); }
+            70% { border-color: #16a34a; box-shadow: 0 0 0 5px rgba(22, 163, 74, 0); }
+            100% { border-color: #16a34a; box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+        }
+
+        @keyframes pulse-break {
+            0% { border-color: #d97706; box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4); }
+            70% { border-color: #d97706; box-shadow: 0 0 0 5px rgba(217, 119, 6, 0); }
+            100% { border-color: #d97706; box-shadow: 0 0 0 0 rgba(217, 119, 6, 0); }
+        }
+
+        .active-session-card {
+            animation: pulse-active 2.5s infinite ease-in-out;
+            border-color: #16a34a !important;
+            background: rgba(240, 253, 244, 0.95) !important;
+        }
+
+        .active-break-card {
+            animation: pulse-break 2.5s infinite ease-in-out;
+            border-color: #d97706 !important;
+            background: rgba(254, 243, 199, 0.95) !important;
+        }
+
+        /* Hide scrollbars */
+        ::-webkit-scrollbar { display: none; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="p-3 flex flex-col justify-between h-screen w-screen select-none">
+
+    <!-- TOP COUNTDOWN BAR: INI-CET 1 NOV 2026 -->
+    <header class="w-full flex justify-center items-center">
+        <div class="white-widget rounded-xl px-4 py-1.5 flex items-center gap-4 border-slate-300">
+            <div class="flex items-center gap-2.5 border-r border-slate-200 pr-4">
+                <div class="p-1.5 bg-red-600 rounded-lg shadow-sm shadow-red-600/30">
+                    <i class="fa-solid fa-user-md text-white text-xs"></i>
+                </div>
+                <div>
+                    <h1 class="text-[10px] uppercase tracking-widest font-extrabold text-red-600">Target Exam</h1>
+                    <div class="text-sm font-black tracking-tight text-slate-900 flex items-center gap-1.5">
+                        INICET 01 NOV 2026
+                        <span class="text-[10px] bg-red-100 text-red-700 border border-red-200 px-1.5 py-0.5 rounded-full font-bold">AIIMS</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Countdown Display -->
+            <div class="flex items-center gap-2 font-mono">
+                <div class="flex flex-col items-center">
+                    <span id="cd-days" class="text-sm font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded border border-slate-300 min-w-[34px] text-center shadow-inner">---</span>
+                    <span class="text-[9px] uppercase tracking-widest text-slate-500 font-bold mt-0.5">Days</span>
+                </div>
+                <span class="text-red-600 font-black text-sm -mt-2">:</span>
+                <div class="flex flex-col items-center">
+                    <span id="cd-hours" class="text-sm font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded border border-slate-300 min-w-[30px] text-center shadow-inner">--</span>
+                    <span class="text-[9px] uppercase tracking-widest text-slate-500 font-bold mt-0.5">Hours</span>
+                </div>
+                <span class="text-red-600 font-black text-sm -mt-2">:</span>
+                <div class="flex flex-col items-center">
+                    <span id="cd-mins" class="text-sm font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded border border-slate-300 min-w-[30px] text-center shadow-inner">--</span>
+                    <span class="text-[9px] uppercase tracking-widest text-slate-500 font-bold mt-0.5">Mins</span>
+                </div>
+                <span class="text-red-600 font-black text-sm -mt-2">:</span>
+                <div class="flex flex-col items-center">
+                    <span id="cd-secs" class="text-sm font-black text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200 min-w-[30px] text-center shadow-inner">--</span>
+                    <span class="text-[9px] uppercase tracking-widest text-red-600 font-bold mt-0.5">Secs</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN BODY GRID (MATCHED WIDGET DIMENSIONS - FONT SIZE 12PX) -->
+    <div class="grid grid-cols-12 gap-3 my-auto items-stretch max-w-4xl mx-auto w-full">
+        
+        <!-- LEFT SIDE: COMPACT SIZED STUDY SCHEDULE TRACKER -->
+        <div class="col-span-7 white-widget rounded-xl p-2.5 flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center mb-1.5 pb-1 border-b border-slate-200">
+                    <div>
+                        <h2 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-regular fa-calendar-check text-red-600"></i> Daily Schedule
+                        </h2>
+                        <p class="text-[10px] font-semibold text-slate-500">IST (07:00 AM – 11:00 PM)</p>
+                    </div>
+                    <div id="current-session-tag" class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-ping"></span> Live
+                    </div>
+                </div>
+
+                <!-- Schedule List -->
+                <div id="schedule-list" class="space-y-1">
+                    <!-- Dynamic rendering -->
+                </div>
+            </div>
+
+            <!-- Bottom Progress Bar -->
+            <div class="mt-1.5 pt-1 border-t border-slate-200 flex flex-col gap-0.5">
+                <div class="flex justify-between text-xs font-bold">
+                    <span class="text-slate-600 flex items-center gap-1">
+                        <i class="fa-solid fa-hourglass-half text-red-600"></i> Remaining:
+                    </span>
+                    <span id="current-session-timer" class="font-mono text-slate-900 font-extrabold">00h 00m left</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden border border-slate-300">
+                    <div id="current-session-progress" class="bg-red-600 h-1.5 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE: MINI CLOCK & POMODORO -->
+        <div class="col-span-5 flex flex-col gap-2.5">
+            
+            <!-- MINI ANALOG CLOCK & DATE WIDGET -->
+            <div class="white-widget rounded-xl p-2.5 flex flex-col items-center relative">
+                <div class="w-full flex justify-between items-center mb-0.5">
+                    <span class="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                        <i class="fa-regular fa-clock text-red-600"></i> IST Clock
+                    </span>
+                    <span class="text-[10px] font-mono font-bold bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-300">IST</span>
+                </div>
+
+                <!-- Micro Analog Clock -->
+                <div class="relative my-1">
+                    <svg width="68" height="68" viewBox="0 0 100 100" class="drop-shadow-xs">
+                        <circle cx="50" cy="50" r="46" class="clock-face"/>
+                        
+                        <g stroke="#64748b" stroke-width="2">
+                            <line x1="50" y1="8" x2="50" y2="14"/>
+                            <line x1="50" y1="86" x2="50" y2="92"/>
+                            <line x1="8" y1="50" x2="14" y2="50"/>
+                            <line x1="86" y1="50" x2="92" y2="50"/>
+                        </g>
+
+                        <line id="hour-hand" x1="50" y1="50" x2="50" y2="28" class="clock-hand-hour" />
+                        <line id="minute-hand" x1="50" y1="50" x2="50" y2="18" class="clock-hand-minute" />
+                        <line id="second-hand" x1="50" y1="50" x2="50" y2="14" class="clock-hand-second" />
+
+                        <circle cx="50" cy="50" r="3" fill="#dc2626" />
+                        <circle cx="50" cy="50" r="1.2" fill="#ffffff" />
+                    </svg>
+                </div>
+
+                <!-- Digital Time & Date -->
+                <div class="text-center">
+                    <div id="digital-time" class="text-sm font-black font-mono text-slate-900 tracking-wider">00:00:00 AM</div>
+                    <div id="live-date" class="text-xs font-bold text-red-600">Mon, 01 Jan 2026</div>
+                </div>
+            </div>
+
+            <!-- COMPACT AUTOMATIC POMODORO WIDGET (60m / 5m) -->
+            <div class="white-widget rounded-xl p-2.5 flex flex-col justify-between flex-1 relative">
+                <div class="flex justify-between items-center mb-0.5">
+                    <span class="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                        <i class="fa-solid fa-stopwatch text-amber-600"></i> Auto Pomodoro
+                    </span>
+                    <span id="pomo-status-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 border border-blue-300">
+                        FOCUS
+                    </span>
+                </div>
+
+                <div class="flex items-center justify-center my-1 relative">
+                    <!-- Progress Circle -->
+                    <svg class="w-18 h-18 transform -rotate-90">
+                        <circle cx="36" cy="36" r="30" stroke="currentColor" stroke-width="4.5" class="text-slate-200" fill="transparent" />
+                        <circle id="pomo-progress-bar" cx="36" cy="36" r="30" stroke="currentColor" stroke-width="4.5" class="text-blue-600 transition-all duration-1000 ease-linear" fill="transparent" stroke-dasharray="188.5" stroke-dashoffset="0" stroke-linecap="round" />
+                    </svg>
+                    
+                    <div class="absolute flex flex-col items-center justify-center text-center">
+                        <span id="pomo-timer" class="text-sm font-black font-mono text-slate-900 tracking-tighter">60:00</span>
+                        <span id="pomo-sublabel" class="text-[9px] font-bold uppercase tracking-wider text-slate-500">Synced</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-100/90 rounded p-1 border border-slate-200 flex justify-between items-center text-xs">
+                    <span class="text-slate-600 font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-sync text-blue-600 text-[10px] animate-spin"></i> Mode:
+                    </span>
+                    <span class="font-extrabold text-slate-900">60m Work / 5m Break</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MINI STREAM FOOTER -->
+    <footer class="w-full flex justify-between items-center text-xs">
+        <div class="white-pill px-3 py-1 rounded-full text-slate-800 flex items-center gap-2 border border-slate-300 font-bold shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+            <span class="font-extrabold text-slate-900 uppercase tracking-wider text-[10px]">INI-CET Stream</span>
+            <span class="text-slate-400">•</span>
+            <span class="text-slate-600">White Compact (90% Blur)</span>
+        </div>
+
+        <div class="white-pill px-3 py-1 rounded-full text-slate-800 flex items-center gap-2 border border-slate-300 font-bold shadow-sm">
+            <span class="text-slate-600"><i class="fa-solid fa-bullseye text-red-600 mr-1"></i> Target: <strong class="text-red-700 font-extrabold">AIIMS Top 100</strong></span>
+            <span class="text-slate-300">|</span>
+            <span class="text-slate-600"><i class="fa-solid fa-bolt text-amber-600 mr-1"></i> Status: <strong class="text-slate-900 font-extrabold">Auto Sync</strong></span>
+        </div>
+    </footer>
+
+    <!-- LOGIC ENGINE -->
+    <script>
+        // --- 1. SCHEDULE DEFINITION (IST) ---
+        const SCHEDULE = [
+            { id: 1, title: "Morning Study Session", start: "07:00", end: "13:30", type: "study", icon: "fa-book-open" },
+            { id: 2, title: "Lunch Break", start: "13:30", end: "14:30", type: "break", icon: "fa-utensils" },
+            { id: 3, title: "Afternoon Study Session", start: "14:30", end: "18:00", type: "study", icon: "fa-brain" },
+            { id: 4, title: "Evening Break", start: "18:00", end: "18:30", type: "break", icon: "fa-mug-hot" },
+            { id: 5, title: "Night Study Session 1", start: "18:30", end: "20:30", type: "study", icon: "fa-laptop-code" },
+            { id: 6, title: "Dinner Break", start: "20:30", end: "21:30", type: "break", icon: "fa-bowl-food" },
+            { id: 7, title: "Late Night Revision", start: "21:30", end: "23:00", type: "study", icon: "fa-moon" }
+        ];
+
+        // Target Exam Date: INI-CET Nov 1, 2026 IST
+        const TARGET_EXAM_DATE = new Date('2026-11-01T09:00:00+05:30');
+
+        // Web Audio Chime
+        let audioCtx = null;
+        function playChime() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.3); // E5
+                
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.6);
+            } catch (e) {
+                console.log("Audio playback blocked");
+            }
+        }
+
+        function parseISTTime(timeStr, now) {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            const d = new Date(now);
+            d.setHours(hours, minutes, 0, 0);
+            return d;
+        }
+
+        function format12H(timeStr) {
+            const [h, m] = timeStr.split(':').map(Number);
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            const h12 = h % 12 || 12;
+            return `${h12.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${ampm}`;
+        }
+
+        // --- 2. COUNTDOWN ENGINE ---
+        function updateExamCountdown(now) {
+            const diff = TARGET_EXAM_DATE - now;
+            if (diff <= 0) {
+                document.getElementById('cd-days').textContent = "00";
+                document.getElementById('cd-hours').textContent = "00";
+                document.getElementById('cd-mins').textContent = "00";
+                document.getElementById('cd-secs').textContent = "00";
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const mins = Math.floor((diff / 1000 / 60) % 60);
+            const secs = Math.floor((diff / 1000) % 60);
+
+            document.getElementById('cd-days').textContent = String(days).padStart(2, '0');
+            document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('cd-mins').textContent = String(mins).padStart(2, '0');
+            document.getElementById('cd-secs').textContent = String(secs).padStart(2, '0');
+        }
+
+        // --- 3. CLOCK ENGINE ---
+        function updateClockAndDate(now) {
+            const hours24 = now.getHours();
+            const hours12 = hours24 % 12 || 12;
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            const ampm = hours24 >= 12 ? 'PM' : 'AM';
+
+            document.getElementById('digital-time').textContent = 
+                `${String(hours12).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} ${ampm}`;
+
+            const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' };
+            document.getElementById('live-date').textContent = now.toLocaleDateString('en-IN', options);
+
+            const secDeg = (seconds / 60) * 360;
+            const minDeg = ((minutes + seconds / 60) / 60) * 360;
+            const hrDeg = (((hours24 % 12) + minutes / 60) / 12) * 360;
+
+            rotateHand('second-hand', secDeg);
+            rotateHand('minute-hand', minDeg);
+            rotateHand('hour-hand', hrDeg);
+        }
+
+        function rotateHand(elementId, angle) {
+            const hand = document.getElementById(elementId);
+            if (hand) hand.setAttribute('transform', `rotate(${angle} 50 50)`);
+        }
+
+        // --- 4. SCHEDULE TRACKER ENGINE ---
+        let lastActiveId = null;
+
+        function renderScheduleList() {
+            const listEl = document.getElementById('schedule-list');
+            listEl.innerHTML = SCHEDULE.map(item => {
+                const isBreak = item.type === 'break';
+                const iconBg = isBreak ? 'bg-amber-100 text-amber-700 border-amber-300' : 'bg-slate-100 text-slate-800 border-slate-300';
+                
+                return `
+                    <div id="sched-item-${item.id}" class="bg-white/80 px-2 py-1 rounded flex items-center justify-between border border-slate-200 transition-all duration-300">
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded border flex items-center justify-center font-bold ${iconBg}">
+                                <i class="fa-solid ${item.icon} text-[10px]"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xs font-black text-slate-900 flex items-center gap-1 leading-none">
+                                    ${item.title}
+                                    ${isBreak ? '<span class="text-[9px] bg-amber-100 text-amber-800 border border-amber-300 px-1 py-0 rounded font-extrabold">BREAK</span>' : ''}
+                                </h3>
+                                <p class="text-[10px] font-mono font-bold text-slate-500 leading-none mt-0.5">
+                                    ${format12H(item.start)} – ${format12H(item.end)}
+                                </p>
+                            </div>
+                        </div>
+                        <div id="status-tag-${item.id}" class="text-xs font-mono font-bold text-slate-400">
+                            Upcoming
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateScheduleStatus(now) {
+            let activeItem = null;
+
+            SCHEDULE.forEach(item => {
+                const start = parseISTTime(item.start, now);
+                const end = parseISTTime(item.end, now);
+                const card = document.getElementById(`sched-item-${item.id}`);
+                const tag = document.getElementById(`status-tag-${item.id}`);
+
+                card.classList.remove('active-session-card', 'active-break-card');
+                
+                if (now >= start && now < end) {
+                    activeItem = item;
+                    if (item.type === 'break') {
+                        card.classList.add('active-break-card');
+                        tag.innerHTML = `<span class="text-amber-800 font-extrabold flex items-center gap-1 text-xs"><i class="fa-solid fa-mug-hot text-[10px]"></i> BREAK</span>`;
+                    } else {
+                        card.classList.add('active-session-card');
+                        tag.innerHTML = `<span class="text-emerald-700 font-extrabold flex items-center gap-1 text-xs"><i class="fa-solid fa-play text-[10px]"></i> LIVE</span>`;
+                    }
+                } else if (now >= end) {
+                    tag.innerHTML = `<span class="text-slate-400 flex items-center gap-1 font-semibold text-xs"><i class="fa-solid fa-check text-[10px] text-slate-500"></i> Done</span>`;
+                } else {
+                    tag.innerHTML = `<span class="text-slate-400 font-medium text-xs">Upcoming</span>`;
+                }
+            });
+
+            const currentTag = document.getElementById('current-session-tag');
+            const progressEl = document.getElementById('current-session-progress');
+            const timerEl = document.getElementById('current-session-timer');
+
+            if (activeItem) {
+                const start = parseISTTime(activeItem.start, now);
+                const end = parseISTTime(activeItem.end, now);
+                const totalSecs = (end - start) / 1000;
+                const elapsedSecs = (now - start) / 1000;
+                const remainingSecs = Math.max(0, totalSecs - elapsedSecs);
+
+                const pct = Math.min(100, Math.max(0, (elapsedSecs / totalSecs) * 100));
+                progressEl.style.width = `${pct}%`;
+
+                const hrsLeft = Math.floor(remainingSecs / 3600);
+                const minsLeft = Math.floor((remainingSecs % 3600) / 60);
+                const secsLeft = Math.floor(remainingSecs % 60);
+
+                if (hrsLeft > 0) {
+                    timerEl.textContent = `${hrsLeft}h ${minsLeft}m left`;
+                } else {
+                    timerEl.textContent = `${minsLeft}m ${secsLeft}s left`;
+                }
+
+                if (activeItem.type === 'break') {
+                    currentTag.className = "text-xs font-extrabold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1";
+                    currentTag.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-ping"></span> Scheduled Break`;
+                    progressEl.className = "bg-amber-600 h-1.5 rounded-full transition-all duration-1000";
+                } else {
+                    currentTag.className = "text-xs font-extrabold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1";
+                    currentTag.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-ping"></span> Live Study Session`;
+                    progressEl.className = "bg-emerald-600 h-1.5 rounded-full transition-all duration-1000";
+                }
+
+                if (lastActiveId !== activeItem.id) {
+                    if (lastActiveId !== null) playChime();
+                    lastActiveId = activeItem.id;
+                }
+            } else {
+                currentTag.className = "text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-300 flex items-center gap-1";
+                currentTag.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Offline Hours`;
+                progressEl.style.width = `0%`;
+                timerEl.textContent = `Offline`;
+            }
+
+            return activeItem;
+        }
+
+        // --- 5. AUTOMATED SYNCHRONIZED POMODORO (60:5) ---
+        const POMO_WORK_MINS = 60;
+        const POMO_BREAK_MINS = 5;
+        const POMO_CYCLE_MINS = POMO_WORK_MINS + POMO_BREAK_MINS;
+
+        let lastPomoState = null;
+
+        function updateAutomatedPomodoro(now, currentScheduleItem) {
+            const pomoBadge = document.getElementById('pomo-status-badge');
+            const pomoTimerEl = document.getElementById('pomo-timer');
+            const pomoSublabel = document.getElementById('pomo-sublabel');
+            const pomoProgressBar = document.getElementById('pomo-progress-bar');
+
+            // Handle Schedule Main Breaks
+            if (currentScheduleItem && currentScheduleItem.type === 'break') {
+                const start = parseISTTime(currentScheduleItem.start, now);
+                const end = parseISTTime(currentScheduleItem.end, now);
+                const remainingSecs = Math.max(0, Math.floor((end - now) / 1000));
+                const totalSecs = (end - start) / 1000;
+
+                const m = Math.floor(remainingSecs / 60);
+                const s = remainingSecs % 60;
+
+                pomoBadge.textContent = "SCHEDULED BREAK";
+                pomoBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300";
+                
+                pomoTimerEl.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                pomoSublabel.textContent = currentScheduleItem.title;
+
+                const pct = remainingSecs / totalSecs;
+                const dashoffset = 188.5 * (1 - pct);
+                pomoProgressBar.style.strokeDashoffset = dashoffset;
+                pomoProgressBar.setAttribute('class', 'text-amber-600 transition-all duration-1000 ease-linear');
+
+                if (lastPomoState !== 'SCHEDULE_BREAK') {
+                    playChime();
+                    lastPomoState = 'SCHEDULE_BREAK';
+                }
+                return;
+            }
+
+            // Standard Loop 60m / 5m
+            const midnight = new Date(now);
+            midnight.setHours(0, 0, 0, 0);
+            const secondsSinceMidnight = Math.floor((now - midnight) / 1000);
+
+            const cycleSecs = POMO_CYCLE_MINS * 60;
+            const currentCycleSecs = secondsSinceMidnight % cycleSecs;
+
+            const workSecs = POMO_WORK_MINS * 60;
+            const breakSecs = POMO_BREAK_MINS * 60;
+
+            if (currentCycleSecs < workSecs) {
+                const remainingSecs = workSecs - currentCycleSecs;
+                const m = Math.floor(remainingSecs / 60);
+                const s = remainingSecs % 60;
+
+                pomoBadge.textContent = "FOCUS (60M)";
+                pomoBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-300";
+                
+                pomoTimerEl.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                pomoSublabel.textContent = "Work Session";
+
+                const pct = remainingSecs / workSecs;
+                const dashoffset = 188.5 * (1 - pct);
+                pomoProgressBar.style.strokeDashoffset = dashoffset;
+                pomoProgressBar.setAttribute('class', 'text-blue-600 transition-all duration-1000 ease-linear');
+
+                if (lastPomoState === 'POMO_BREAK') playChime();
+                lastPomoState = 'POMO_WORK';
+            } else {
+                const remainingSecs = cycleSecs - currentCycleSecs;
+                const m = Math.floor(remainingSecs / 60);
+                const s = remainingSecs % 60;
+
+                pomoBadge.textContent = "BREAK (5M)";
+                pomoBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300";
+                
+                pomoTimerEl.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                pomoSublabel.textContent = "Rest & Hydrate";
+
+                const pct = remainingSecs / breakSecs;
+                const dashoffset = 188.5 * (1 - pct);
+                pomoProgressBar.style.strokeDashoffset = dashoffset;
+                pomoProgressBar.setAttribute('class', 'text-emerald-600 transition-all duration-1000 ease-linear');
+
+                if (lastPomoState === 'POMO_WORK') playChime();
+                lastPomoState = 'POMO_BREAK';
+            }
+        }
+
+        // --- 6. TICK ENGINE ---
+        function masterTick() {
+            const now = new Date();
+
+            updateExamCountdown(now);
+            updateClockAndDate(now);
+            const activeScheduleItem = updateScheduleStatus(now);
+            updateAutomatedPomodoro(now, activeScheduleItem);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderScheduleList();
+            masterTick();
+            setInterval(masterTick, 1000);
+            
+            document.body.addEventListener('click', () => {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }, { once: true });
+        });
+    </script>
+</body>
+</html>
