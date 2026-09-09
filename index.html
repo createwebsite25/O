@@ -103,17 +103,17 @@
                         url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1920&auto=format&fit=crop') center/cover;
         }
 
-        /* 75% Camera Output Blur Filter Layer */
+        /* 95% Camera Output Blur Filter Layer */
         .camera-blur-overlay {
             position: absolute;
             inset: 0;
-            backdrop-filter: blur(20px) contrast(98%) brightness(0.98);
-            -webkit-backdrop-filter: blur(20px) contrast(98%) brightness(0.98);
-            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(25px) contrast(98%) brightness(0.98);
+            -webkit-backdrop-filter: blur(25px) contrast(98%) brightness(0.98);
+            background: rgba(255, 255, 255, 0.15);
             pointer-events: none;
             z-index: -1;
             transition: opacity 0.3s ease;
-            opacity: 0.75;
+            opacity: 0.95;
         }
 
         /* Scrollbar custom styling */
@@ -126,8 +126,8 @@
     <!-- MAIN 16:9 STREAM OVERLAY CONTAINER -->
     <div id="canvasContainer" class="stream-canvas p-6 flex flex-col justify-between pointer-events-none transition-all duration-300 relative">
         
-        <!-- 60% Camera Backdrop Blur Layer -->
-        <div id="cameraBlurLayer" class="camera-blur-overlay opacity-60"></div>
+        <!-- 95% Camera Backdrop Blur Layer -->
+        <div id="cameraBlurLayer" class="camera-blur-overlay opacity-95"></div>
 
         <!-- ================= TOP SECTION ================= -->
         <div class="w-full flex justify-between items-start pointer-events-auto">
@@ -426,14 +426,19 @@
 
             <!-- Audio & OBS Helper Controls (Auto-hides or stays subtle) -->
             <div class="pearl-glass px-3 py-1.5 flex items-center space-x-3 text-slate-600">
+                <button onclick="toggleWhiteNoise()" id="btnNoiseToggle" class="flex items-center space-x-1.5 text-xs font-semibold hover:text-blue-600 transition">
+                    <i class="fa-solid fa-wind text-teal-600" id="noiseIcon"></i>
+                    <span id="noiseText">White Noise: ON</span>
+                </button>
+                <div class="h-3 w-[1px] bg-slate-300"></div>
                 <button onclick="toggleAudioChime()" id="btnAudioToggle" class="flex items-center space-x-1.5 text-xs font-semibold hover:text-blue-600 transition">
                     <i class="fa-solid fa-volume-high text-emerald-600" id="audioIcon"></i>
-                    <span id="audioText">Sound ON</span>
+                    <span id="audioText">Chimes ON</span>
                 </button>
                 <div class="h-3 w-[1px] bg-slate-300"></div>
                 <button onclick="toggleCamBlur()" class="flex items-center space-x-1.5 text-xs font-semibold hover:text-blue-600 transition">
                     <i class="fa-solid fa-eye-slash text-purple-600" id="camBlurIcon"></i>
-                    <span id="camBlurText">Cam Blur: 75%</span>
+                    <span id="camBlurText">Cam Blur: 95%</span>
                 </button>
                 <div class="h-3 w-[1px] bg-slate-300"></div>
                 <button onclick="toggleBackgroundPreview()" class="flex items-center space-x-1.5 text-xs font-semibold hover:text-blue-600 transition">
@@ -460,6 +465,12 @@
         let audioEnabled = true;
         let camBlurEnabled = true;
 
+        /* Ambient White Noise Generator State */
+        let whiteNoiseNode = null;
+        let whiteNoiseGain = null;
+        let whiteNoiseAudioCtx = null;
+        let whiteNoiseActive = true;
+
         // Schedule definition array for 24-hour evaluation
         const SCHEDULE_BLOCKS = [
             { id: 'block-1', name: 'Morning Work', startHour: 7, startMin: 0, endHour: 13, endMin: 30, type: 'work' },
@@ -471,6 +482,91 @@
             { id: 'block-7', name: 'Night Revision', startHour: 21, startMin: 30, endHour: 23, endMin: 0, type: 'work' },
             { id: 'block-8', name: 'Rest & Sleep', startHour: 23, startMin: 0, endHour: 7, endMin: 0, type: 'off' }
         ];
+
+        function initWhiteNoise() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                
+                if (!whiteNoiseAudioCtx) {
+                    whiteNoiseAudioCtx = new AudioCtx();
+                }
+
+                if (whiteNoiseAudioCtx.state === 'suspended') {
+                    whiteNoiseAudioCtx.resume();
+                }
+
+                if (whiteNoiseNode) return;
+
+                // Create 5 seconds loopable pink/soft white noise buffer
+                const bufferSize = whiteNoiseAudioCtx.sampleRate * 5;
+                const noiseBuffer = whiteNoiseAudioCtx.createBuffer(1, bufferSize, whiteNoiseAudioCtx.sampleRate);
+                const output = noiseBuffer.getChannelData(0);
+                
+                let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+                for (let i = 0; i < bufferSize; i++) {
+                    const white = Math.random() * 2 - 1;
+                    b0 = 0.99886 * b0 + white * 0.0555179;
+                    b1 = 0.99332 * b1 + white * 0.0750759;
+                    b2 = 0.96900 * b2 + white * 0.1538520;
+                    b3 = 0.86650 * b3 + white * 0.3104856;
+                    b4 = 0.55000 * b4 + white * 0.5329522;
+                    b5 = -0.7616 * b5 - white * 0.0168980;
+                    output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                    output[i] *= 0.11;
+                    b6 = white * 0.115926;
+                }
+
+                whiteNoiseNode = whiteNoiseAudioCtx.createBufferSource();
+                whiteNoiseNode.buffer = noiseBuffer;
+                whiteNoiseNode.loop = true;
+
+                // Gentle low-pass filter for soft study ambience
+                const filter = whiteNoiseAudioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(800, whiteNoiseAudioCtx.currentTime);
+
+                whiteNoiseGain = whiteNoiseAudioCtx.createGain();
+                whiteNoiseGain.gain.setValueAtTime(0.06, whiteNoiseAudioCtx.currentTime);
+
+                whiteNoiseNode.connect(filter);
+                filter.connect(whiteNoiseGain);
+                whiteNoiseGain.connect(whiteNoiseAudioCtx.destination);
+
+                whiteNoiseNode.start();
+            } catch (e) {
+                console.log("White noise auto-play pending interaction:", e);
+            }
+        }
+
+        function stopWhiteNoise() {
+            if (whiteNoiseGain && whiteNoiseAudioCtx) {
+                whiteNoiseGain.gain.exponentialRampToValueAtTime(0.0001, whiteNoiseAudioCtx.currentTime + 0.3);
+                setTimeout(() => {
+                    if (whiteNoiseNode) {
+                        try { whiteNoiseNode.stop(); } catch(e){}
+                        whiteNoiseNode.disconnect();
+                        whiteNoiseNode = null;
+                    }
+                }, 300);
+            }
+        }
+
+        function toggleWhiteNoise() {
+            whiteNoiseActive = !whiteNoiseActive;
+            const icon = document.getElementById('noiseIcon');
+            const text = document.getElementById('noiseText');
+
+            if (whiteNoiseActive) {
+                initWhiteNoise();
+                icon.className = "fa-solid fa-wind text-teal-600";
+                text.innerText = "White Noise: ON";
+            } else {
+                stopWhiteNoise();
+                icon.className = "fa-solid fa-wind text-slate-400";
+                text.innerText = "White Noise: OFF";
+            }
+        }
 
         // Web Audio Synthesizer for pleasant completion chimes
         function playChimeSound(isBreak) {
@@ -484,7 +580,7 @@
                 const gain = ctx.createGain();
                 
                 osc.type = isBreak ? 'sine' : 'triangle';
-                osc.frequency.setValueAtTime(isBreak ? 523.25 : 659.25, ctx.currentTime); // C5 or E5
+                osc.frequency.setValueAtTime(isBreak ? 523.25 : 659.25, ctx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(isBreak ? 659.25 : 880, ctx.currentTime + 0.3);
                 
                 gain.gain.setValueAtTime(0.15, ctx.currentTime);
@@ -675,9 +771,9 @@
             const text = document.getElementById('camBlurText');
 
             if (camBlurEnabled) {
-                blurLayer.style.opacity = '0.75';
+                blurLayer.style.opacity = '0.95';
                 icon.className = "fa-solid fa-eye-slash text-purple-600";
-                text.innerText = "Cam Blur: 75%";
+                text.innerText = "Cam Blur: 95%";
             } else {
                 blurLayer.style.opacity = '0';
                 icon.className = "fa-solid fa-eye text-slate-400";
@@ -702,6 +798,14 @@
             updateExamCountdown();
             updateAnalogClockAndDate();
             
+            // Auto start ambient white noise generator
+            initWhiteNoise();
+
+            // Unlock audio on initial user click if browser policy requires gesture
+            document.addEventListener('click', () => {
+                if (whiteNoiseActive) initWhiteNoise();
+            }, { once: false });
+
             // Set precise intervals
             setInterval(updateAnalogClockAndDate, 1000);
             setInterval(updateExamCountdown, 1000);
